@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.8)
 project(libsurvive)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -flto -DUSE_DOUBLE -std=gnu99 -rdynamic -fsanitize=address -fsanitize=undefined")
@@ -12,5 +13,8 @@ add_library(libsurvive SHARED
 
 target_link_libraries(libsurvive pthread z m usb-1.0)
 
-add_executable(test test.c)
-target_link_libraries(test libsurvive)
+add_executable(pose_test test.c)
+target_link_libraries(pose_test libsurvive)
+
+add_executable(playback playback.c)
+target_link_libraries(playback libsurvive)
