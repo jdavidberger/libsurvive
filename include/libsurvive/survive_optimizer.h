@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 typedef struct {
+	survive_timecode timecode; 
 	FLT value;
 	FLT variance;
 	uint8_t lh;
@@ -23,10 +24,12 @@ typedef struct {
 	size_t measurementsCnt;
 	FLT current_bias;
 	SurvivePose initialPose;
+	survive_timecode current_timecode;
 
 	double *parameters;
 	struct mp_par_struct *parameters_info;
 
+	bool useVelocity;
 	int poseLength;
 	int cameraLength;
 	int fcalLength;
@@ -42,6 +45,7 @@ typedef struct {
 		ctx.parameters_info[i].fixed = 1;                                                                              \
 	}
 
+SURVIVE_EXPORT SurviveVelocity *survive_optimizer_get_velocity(survive_optimizer* ctx); 
 SURVIVE_EXPORT SurvivePose *survive_optimizer_get_pose(survive_optimizer *ctx);
 SURVIVE_EXPORT int survive_optimizer_get_camera_index(const survive_optimizer *ctx);
 SURVIVE_EXPORT SurvivePose *survive_optimizer_get_camera(survive_optimizer *ctx);

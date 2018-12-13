@@ -72,7 +72,7 @@ void survive_optimizer_setup_cameras(survive_optimizer *mpfit_ctx, SurviveContex
 }
 
 int survive_optimizer_get_parameters_count(const survive_optimizer *ctx) {
-	return ctx->cameraLength * 7 + ctx->poseLength * 7 + ctx->ptsLength * 3 +
+	return ctx->cameraLength * 7 + ctx->poseLength * (7 * ((int)ctx->useVelocity + 1)) + ctx->ptsLength * 3 + 
 		   ctx->fcalLength * sizeof(BaseStationCal) / sizeof(double);
 }
 
@@ -103,8 +103,15 @@ SurvivePose *survive_optimizer_get_camera(survive_optimizer *ctx) {
 	return (SurvivePose *)&ctx->parameters[survive_optimizer_get_camera_index(ctx)];
 }
 
-int survive_optimizer_get_camera_index(const survive_optimizer *ctx) { return ctx->poseLength * 7; }
+int survive_optimizer_get_velocity_index(const survive_optimizer *ctx) { return ctx->poseLength * 7; }
+int survive_optimizer_get_camera_index(const survive_optimizer *ctx) { return ctx->poseLength * (7 + (ctx->useVelocity + 1)); }
 
+SurviveVelocity *survive_optimizer_get_velocity(survive_optimizer* ctx) {
+	if (ctx->useVelocity) {
+		return &ctx->parameters[survive_optimizer_get_velocity_index(ctx)];
+	}
+	return 0;
+}
 SurvivePose *survive_optimizer_get_pose(survive_optimizer *ctx) {
 	if (ctx->poseLength)
 		return (SurvivePose *)ctx->parameters;
@@ -135,7 +142,7 @@ static int mpfunc(int m, int n, double *p, double *deviates, double **derivs, vo
 	const double *sensor_points = survive_optimizer_get_sensors(mpfunc_ctx);
 
 	int pose_idx = -1;
-	SurvivePose *pose = 0;
+	SurvivePose pose = { 0 };
 	SurvivePose obj2lh[NUM_LIGHTHOUSES] = { 0 };
 
 	int meas_count = m;
@@ -158,16 +165,23 @@ static int mpfunc(int m, int n, double *p, double *deviates, double **derivs, vo
 		const FLT *pt = &sensor_points[meas->sensor_idx * 3];
 		SurviveContext *ctx = mpfunc_ctx->so->ctx;
 
-		if (pose_idx != meas->object) {
+		if (pose_idx != meas->object || mpfunc_ctx->useVelocity) {
 			pose_idx = meas->object;
-			pose = &survive_optimizer_get_pose(mpfunc_ctx)[meas->object];
+			pose = survive_optimizer_get_pose(mpfunc_ctx)[meas->object];
+			quatnormalize(pose.Rot, pose.Rot);
 
-			// SV_INFO("Before\t" SurvivePose_format, SURVIVE_POSE_EXPAND(*pose));
-			quatnormalize(pose->Rot, pose->Rot);
-			// SV_INFO("After\t" SurvivePose_format, SURVIVE_POSE_EXPAND(*pose));
+			if (mpfunc_ctx->useVelocity) {
+				SurviveVelocity* velocity = survive_optimizer_get_velocity(mpfunc_ctx) + meas->object;
+				FLT t = -survive_timecode_difference(mpfunc_ctx->current_timecode, meas->timecode) / (FLT)mpfunc_ctx->so->timebase_hz;
+				survive_apply_ang_velocity(pose.Rot, velocity->AxisAngleRot, t, pose.Rot);
+
+				LinmathVec3d displacement = { 0 };
+				scale3d(displacement, velocity->Pos, t);
+				add3d(pose.Pos, pose.Pos, displacement);
+			}
 
 			for (int lh = 0; lh < mpfunc_ctx->so->ctx->activeLighthouses; lh++) {
-				ApplyPoseToPose(&obj2lh[lh], &cameras[lh], pose);
+				ApplyPoseToPose(&obj2lh[lh], &cameras[lh], &pose);
 			}
 		}
 
@@ -194,7 +208,7 @@ static int mpfunc(int m, int n, double *p, double *deviates, double **derivs, vo
 		if (derivs) {
 			if (nextIsPair) {
 				FLT out[7 * 2] = { 0 };
-				survive_reproject_full_jac_obj_pose(out, pose, pt, world2lh, cal);
+				survive_reproject_full_jac_obj_pose(out, &pose, pt, world2lh, cal);
 
 				for (int j = 0; j < 7; j++) {
 					if (derivs[j]) {
@@ -206,7 +220,7 @@ static int mpfunc(int m, int n, double *p, double *deviates, double **derivs, vo
 				}
 			} else {
 				FLT out[7] = { 0 };
-				reproject_axis_jacob_fns[meas->axis](out, pose, pt, world2lh, cal);
+				reproject_axis_jacob_fns[meas->axis](out, &pose, pt, world2lh, cal);
 				for (int j = 0; j < 7; j++) {
 					if (derivs[j]) {
 						derivs[j][i] = out[j];

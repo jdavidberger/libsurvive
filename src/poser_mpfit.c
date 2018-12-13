@@ -80,6 +80,7 @@ static size_t construct_input_from_scene(const MPFITData *d, size_t timecode, co
 					meas->value = a[axis];
 					meas->sensor_idx = sensor;
 					meas->lh = lh;
+					meas->timecode = scene->timecode[sensor][lh][axis];
 					survive_timecode diff = survive_timecode_difference(timecode, scene->timecode[sensor][lh][axis]);
 					meas->variance =
 						d->sensor_variance + diff * d->sensor_variance_per_second / (double)so->timebase_hz;
@@ -131,7 +132,9 @@ static double run_mpfit_find_3d_structure(MPFITData *d, PoserDataLight *pdl, Sur
 	survive_optimizer mpfitctx = {
 		.so = so,
 		//.current_bias = 0.01,
+		.useVelocity = 1,
 		.poseLength = 1,
+		.current_timecode = pdl->timecode,
 		.cameraLength = so->ctx->activeLighthouses,
 	};
 
@@ -141,6 +144,10 @@ static double run_mpfit_find_3d_structure(MPFITData *d, PoserDataLight *pdl, Sur
 	survive_optimizer_setup_cameras(&mpfitctx, so->ctx, true);
 
 	survive_optimizer_setup_pose(&mpfitctx, 0, false, d->use_jacobian_function);
+
+	if (mpfitctx.useVelocity) {
+		survive_optimizer_get_velocity(&mpfitctx)[0] = so->OutVelocity; 
+	}
 
 	size_t meas_size = construct_input_from_scene(d, pdl->timecode, scene, mpfitctx.measurements);
 

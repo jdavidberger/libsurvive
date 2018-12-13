@@ -88,8 +88,11 @@ struct SurviveObject {
 	// Pose Information, also "poser" field.
 	FLT PoseConfidence;						 // 0..1
 	SurvivePose OutPose;
+	SurviveVelocity OutVelocity; 
+
 	SurvivePose OutPoseIMU;
 
+	survive_timecode OutVelocity_timecode;
 	survive_timecode OutPose_timecode;
 	SurvivePose FromLHPose[NUM_LIGHTHOUSES]; // Filled out by poser, contains computed position from each lighthouse.
 	void *PoserData; // Initialized to zero, configured by poser, can be anything the poser wants.
