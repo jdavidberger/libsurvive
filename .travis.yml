@@ -3,4 +3,10 @@ language: c
 matrix:
    include:
       - os: linux
+         script:
+    	    - mkdir -p bin
+	    - cd bin && cmake .. && cmake --build .
       - os: windows
+         script:
+    	    - mkdir -p bin
+	    - cd bin && cmake .. && cmake --build .
