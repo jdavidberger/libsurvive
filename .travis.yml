@@ -1,0 +1,6 @@
+language: c
+
+matrix:
+   include:
+      - os: linux
+      - os: windows
