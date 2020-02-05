@@ -12,6 +12,6 @@ before_install:
 script:
    - mkdir -p bin
    - cd bin
-   - cmake ..
+   - cmake -DENABLE_TESTS=ON -DUSE_ASAN=ON ..
    - cmake --build .
    - ctest .

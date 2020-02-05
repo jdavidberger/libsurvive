@@ -39,15 +39,16 @@ IF(NOT WIN32)
 	ENDIF()
 
 	IF(USE_OPENCV)
-		add_definitions(-DUSE_OPENCV)
+	  add_definitions(-DUSE_OPENCV)
 	ENDIF()
+	
+	if(USE_ASAN)
+	  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fsanitize=undefined")
+	endif()
+	      
 ELSE()
 	option(USE_LAPACKE "Use LAPACKE" ON)
 ENDIF()
-
-if(USE_ASAN)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fsanitize=undefined")
-endif()
 
 if(USE_HIDAPI OR WIN32)
     add_definitions (-DHIDAPI)
