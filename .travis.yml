@@ -7,7 +7,7 @@ matrix:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" != 'windows' ]]; then sudo apt-get update -qq; fi
-  - if [[ "$TRAVIS_OS_NAME" != 'windows' ]]; then sudo apt-get install build-essential zlib1g-dev libx11-dev libusb-1.0-0-dev freeglut3-dev liblapacke-dev libopenblas-dev libatlas-base-dev; fi   
+  - if [[ "$TRAVIS_OS_NAME" != 'windows' ]]; then sudo apt-get install build-essential zlib1g-dev libx11-dev libusb-1.0-0-dev freeglut3-dev liblapacke-dev libopenblas-dev libatlas-base-dev libpcap-dev; fi   
 
 script:
    - mkdir -p bin

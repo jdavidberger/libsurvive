@@ -31,7 +31,6 @@ ExternalProject_Add(libsurvive-extras-data
         INSTALL_COMMAND ""
         CONFIGURE_COMMAND ""
         SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libsurvive-extras-data
-        EXCLUDE_FROM_ALL True
         )
 
 add_custom_target(run_all_tests COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS test_replays libsurvive-extras-data survive_tests survive_plugins)
