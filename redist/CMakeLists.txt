@@ -81,7 +81,7 @@ IF(USE_LAPACKE OR WIN32) # NOT USE_OPENCV -- lapack / blas
 				EXPECTED_MD5 406324e1744923a530a3f45b8e4fe1eb  STATUS status LOG log)
 			find_program(NUGET nuget HINTS "${CMAKE_CURRENT_BINARY_DIR}" )
 		endif()
-
+		message("Nuget is found at ${NUGET}")
 		add_custom_target(nuget-restore
 		  COMMAND ${NUGET} restore ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.sln
 		)
