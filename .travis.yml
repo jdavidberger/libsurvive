@@ -14,4 +14,4 @@ script:
    - cd bin
    - cmake -DENABLE_TESTS=ON -DUSE_ASAN=ON ..
    - cmake --build .
-   - ctest . --config Debug --output-on-failure
+   - ctest . -C Debug --output-on-failure
