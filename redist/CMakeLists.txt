@@ -69,6 +69,7 @@ IF(USE_LAPACKE OR WIN32) # NOT USE_OPENCV -- lapack / blas
 			set(WIN_PLATFORM "win32")
 		endif(CMAKE_SIZEOF_VOID_P MATCHES 8)
 
+		include_directories(${CMAKE_BINARY_DIR}/packages/OpenBLAS.0.2.14.1/lib/native/include/)
 		target_link_libraries(minimal_opencv
 			${CMAKE_BINARY_DIR}/packages/OpenBLAS.0.2.14.1/lib/native/lib/${WIN_PLATFORM}/libopenblas.dll.a
 			)
