@@ -80,7 +80,7 @@ elseif(WIN32)
     find_program(NUGET nuget HINTS "${CMAKE_BINARY_DIR}" )
   endif()
   message("Nuget is found at ${NUGET}")
-  add_custom_command(TARGET minimal_opencv PRE_BUILD COMMAND ${NUGET} restore ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.sln COMMENT "Restoring nuget dependencies")
+  #add_custom_command(TARGET minimal_opencv PRE_BUILD COMMAND ${NUGET} restore ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.sln COMMENT "Restoring nuget dependencies")
   set_property(TARGET minimal_opencv PROPERTY VS_PACKAGE_REFERENCES "OpenBLAS_0.2.14.1")
 
 ENDIF()
