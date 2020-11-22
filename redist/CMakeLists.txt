@@ -54,6 +54,10 @@ if(LAPACKE_FILE)
   add_definitions(-DLAPACKE_FOLDER)
 endif()
 
+if(WIN32)
+  include_directories(${CMAKE_BINARY_DIR}/packages/OpenBLAS.0.2.14.1/lib/native/include/)
+endif()
+
 message("Using blas backend ${BLAS_BACKEND}")
 add_library(minimal_opencv STATIC ${MINIMAL_OPENCV_SRCS})
 set_target_properties(minimal_opencv PROPERTIES LINKER_LANGUAGE C)
@@ -68,7 +72,6 @@ elseif(WIN32)
     set(WIN_PLATFORM "win32")
   endif(CMAKE_SIZEOF_VOID_P MATCHES 8)
 
-  include_directories(${CMAKE_BINARY_DIR}/packages/OpenBLAS.0.2.14.1/lib/native/include/)
   target_link_libraries(minimal_opencv
     ${CMAKE_BINARY_DIR}/packages/OpenBLAS.0.2.14.1/lib/native/lib/${WIN_PLATFORM}/libopenblas.dll.a
     )
@@ -80,8 +83,7 @@ elseif(WIN32)
     find_program(NUGET nuget HINTS "${CMAKE_BINARY_DIR}" )
   endif()
   message("Nuget is found at ${NUGET}")
-  #add_custom_command(TARGET minimal_opencv PRE_BUILD COMMAND ${NUGET} restore ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.sln COMMENT "Restoring nuget dependencies")
-  set_property(TARGET minimal_opencv PROPERTY VS_PACKAGE_REFERENCES "OpenBLAS_0.2.14.1")
+  add_custom_command(TARGET minimal_opencv PRE_BUILD COMMAND ${NUGET} restore ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.sln COMMENT "Restoring nuget dependencies")
 
 ENDIF()
 
